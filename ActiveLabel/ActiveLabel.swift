@@ -122,8 +122,15 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
     }
     
     override open var attributedText: NSAttributedString? {
-        didSet { updateTextStorage() }
+        willSet{
+            originalAttributes = nil
+        }
+        didSet {
+            updateTextStorage()
+        }
     }
+    
+    private var originalAttributes : [(UIColor, NSRange)]?
     
     override open var font: UIFont! {
         didSet { updateTextStorage(parseText: false) }
@@ -284,6 +291,21 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
             return
         }
         
+        if originalAttributes == nil{
+            originalAttributes  = [(UIColor, NSRange)]()
+            if parseText{
+                print("<<<<<<<<<<<<<<<< started >>>>>>>>>>>>>>>>>>>")
+                attributedText.enumerateAttribute(.foregroundColor, in: NSRange(0..<attributedText.length)) { value, range, stop in
+                    if let color = value as? UIColor{
+                        originalAttributes?.append((color, range))
+                    }
+                    print("===== \(value as? UIColor) ----- \(range) ======")
+                }
+                print("<<<<<<<<<<<<<<<< end >>>>>>>>>>>>>>>>>>>")
+            }
+            
+        }
+        
         let mutAttrString = addLineBreak(attributedText)
         
         if parseText {
@@ -293,8 +315,16 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
         }
         
         addLinkAttribute(mutAttrString)
+        if let attrs =  originalAttributes{
+            for existingColor in attrs {
+                mutAttrString.addAttribute(.foregroundColor, value: existingColor.0, range: existingColor.1)
+            }
+        }
+        
+        
         textStorage.setAttributedString(mutAttrString)
         _customizing = true
+        
         text = mutAttrString.string
         _customizing = false
         setNeedsDisplay()
