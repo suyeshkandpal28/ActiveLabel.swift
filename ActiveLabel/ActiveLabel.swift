@@ -130,7 +130,7 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
         }
     }
     
-    private var originalAttributes : [(UIColor, NSRange)]?
+    private var originalAttributes : [(UIFont, NSRange)]?
     
     override open var font: UIFont! {
         didSet { updateTextStorage(parseText: false) }
@@ -292,14 +292,14 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
         }
         
         if originalAttributes == nil{
-            originalAttributes  = [(UIColor, NSRange)]()
+            originalAttributes  = [(UIFont, NSRange)]()
             if parseText{
                 print("<<<<<<<<<<<<<<<< started >>>>>>>>>>>>>>>>>>>")
-                attributedText.enumerateAttribute(.foregroundColor, in: NSRange(0..<attributedText.length)) { value, range, stop in
-                    if let color = value as? UIColor{
-                        originalAttributes?.append((color, range))
+                attributedText.enumerateAttribute(.font, in: NSRange(0..<attributedText.length)) { value, range, stop in
+                    if let font = value as? UIFont{
+                        originalAttributes?.append((font, range))
                     }
-                    print("===== \(value as? UIColor) ----- \(range) ======")
+                    print("===== \(value as? UIFont) ----- \(range) ======")
                 }
                 print("<<<<<<<<<<<<<<<< end >>>>>>>>>>>>>>>>>>>")
             }
@@ -316,8 +316,10 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
         
         addLinkAttribute(mutAttrString)
         if let attrs =  originalAttributes{
-            for existingColor in attrs {
-                mutAttrString.addAttribute(.foregroundColor, value: existingColor.0, range: existingColor.1)
+            for existingFont in attrs {
+                if (existingFont.1.location + existingFont.1.length) <= mutAttrString.string.count{
+                    mutAttrString.addAttribute(.font, value: existingFont.0, range: existingFont.1)
+                }
             }
         }
         
