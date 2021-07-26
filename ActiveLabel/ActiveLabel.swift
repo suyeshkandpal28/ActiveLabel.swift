@@ -317,7 +317,7 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
         addLinkAttribute(mutAttrString)
         if let attrs =  originalAttributes{
             for existingFont in attrs {
-                if (existingFont.1.location + existingFont.1.length) <= mutAttrString.string.count{
+                if (existingFont.1.location + existingFont.1.length) <= mutAttrString.length{
                     mutAttrString.addAttribute(.font, value: existingFont.0, range: existingFont.1)
                 }
             }
